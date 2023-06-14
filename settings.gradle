@@ -1,0 +1,14 @@
+include ':system_ui_setting'
+include ':app'
+rootProject.name = "Demo"
+include ':test_rxjava'
+include ':HandlerTest'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+}
