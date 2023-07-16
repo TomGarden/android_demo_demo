@@ -1,7 +1,7 @@
 package io.github.tomgarden.HandlerTest
 
-import android.app.Activity
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        Logger.i("onCreate")
         super.onCreate(savedInstanceState)
 
         Logger.addLogAdapter(AndroidLogAdapter())
@@ -60,8 +61,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        Logger.i("onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Logger.i("onResume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Logger.i("onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Logger.i("onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Logger.i("onDestroy")
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        //outState.putString("key", "value")
+        Logger.i("onSaveInstanceState(outState: Bundle)")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Logger.i("onRestoreInstanceState(savedInstanceState: Bundle)")
     }
 }
 
@@ -147,7 +180,7 @@ fun HandlerTestGroup() = Column() {
     }
 
     Button(onClick = {
-        mContext.startActivity(Intent(mContext,LifecycleActivity::class.java))
+        mContext.startActivity(Intent(mContext,ActivityOne::class.java))
     }) {
         Text("start new Activity")
     }

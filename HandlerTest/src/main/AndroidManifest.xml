@@ -19,7 +19,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LifecycleActivity" />
+        <activity android:name=".ActivityOne" />
+        <activity
+            android:exported="true"
+            android:name=".ActivityTwo"
+            android:launchMode="singleInstancePerTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
