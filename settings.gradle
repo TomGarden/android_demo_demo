@@ -12,3 +12,4 @@ dependencyResolutionManagement {
         jcenter()
     }
 }
+include ':KotlinCoroutine'

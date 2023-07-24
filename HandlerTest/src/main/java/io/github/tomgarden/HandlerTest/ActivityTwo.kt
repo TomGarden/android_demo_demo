@@ -35,22 +35,22 @@ class ActivityTwo: ComponentActivity() {
             }
         }
 
-        val intent:Intent
-        val sc: ServiceConnection = object :ServiceConnection{
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                service.
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                TODO("Not yet implemented")
-            }
-
-        }
-        bindService(intent,sc,1)
-        val service:Service;
-        service.stopSelf()
-        startService()
-        bindService()
+//        val intent:Intent
+//        val sc: ServiceConnection = object :ServiceConnection{
+//            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+//                service.
+//            }
+//
+//            override fun onServiceDisconnected(name: ComponentName?) {
+//                TODO("Not yet implemented")
+//            }
+//
+//        }
+//        bindService(intent,sc,1)
+//        val service:Service;
+//        service.stopSelf()
+//        startService()
+//        bindService()
     }
 
     override fun onStart() {

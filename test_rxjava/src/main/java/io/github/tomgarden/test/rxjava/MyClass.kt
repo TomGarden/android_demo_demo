@@ -17,16 +17,16 @@ fun main(args: Array<String>) {
 //    System.out.println("ddd" + stringBuilder)
     //                            0, 1, 2, 3, 4, 5, 6, 7
 
-    ThreadTest().testFunctionFieldThread()
-    return
-
-    KotlinTest().testGlobalScope()
-
-    return
-
-    val unCustomClassical = SquareStyle.CLASSICAL
-    val customClassical = SquareStyle.CLASSICAL.also { it.isCustom = true }
-    System.out.println(unCustomClassical == customClassical)
+//    ThreadTest().testFunctionFieldThread()
+//    return
+//
+//    KotlinTest().testGlobalScope()
+//
+//    return
+//
+//    val unCustomClassical = SquareStyle.CLASSICAL
+//    val customClassical = SquareStyle.CLASSICAL.also { it.isCustom = true }
+//    System.out.println(unCustomClassical == customClassical)
 
 //    return
 //
@@ -44,6 +44,9 @@ fun main(args: Array<String>) {
 //    list.subList(1 + 1, 1 + 3).clear()
 //    System.out.println("ddd")
 
+
+//    KotlinTest().test()
+    KotlinObj(1)
 }
 
 //gsonTestFunc

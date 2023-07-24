@@ -1,5 +1,13 @@
 package io.github.tomgarden.test.rxjava
 
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
+import io.reactivex.functions.Action
+import io.reactivex.functions.Consumer
+import io.reactivex.internal.functions.Functions
 import kotlinx.coroutines.*
 
 
@@ -48,4 +56,41 @@ class KotlinTest {
             System.out.println(index)
         }
     }
+
+    private fun <T : Any> Observable<T>.subscribeCustom(
+        onStart: Function0<Boolean>,
+        onNext: Consumer<in T> = Functions.emptyConsumer(),
+        onError: Consumer<in Throwable> = Functions.ERROR_CONSUMER,
+        onComplete: Action = Functions.EMPTY_ACTION,
+    ): Disposable {
+        if (!onStart.invoke()) {
+            return Disposables.empty()
+        }
+
+        return subscribe(onNext, onError, onComplete)
+    }
+
+
+     fun test() {
+
+        Observable.create<Int>(object : ObservableOnSubscribe<Int> {
+            override fun subscribe(emitter: ObservableEmitter<Int>) {
+                for (index in 1..3) {
+                    emitter.onNext(index)
+                    println("发射$index")
+                }
+            }
+        })
+            .subscribeCustom(onStart = object : Function0<Boolean> {
+                override fun invoke(): Boolean {
+                    return true
+                }
+            } ,
+            onNext = {
+                println(it)
+            })
+
+
+    }
+
 }

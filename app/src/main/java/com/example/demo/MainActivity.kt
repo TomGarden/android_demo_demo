@@ -16,6 +16,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_bindable_main)
 
+
+        ActivityBindableMainBinding.inflate(layoutInflater)
         val binding: ActivityBindableMainBinding by lazy { DataBindingUtil.setContentView<ActivityBindableMainBinding>(this, R.layout.activity_bindable_main) }
         binding.viewModule = ViewModelProvider.NewInstanceFactory().create(TomViewModule::class.java)
         //binding.viewModule = ViewModelProviders.of(this).get(TomViewModule::class.java)
