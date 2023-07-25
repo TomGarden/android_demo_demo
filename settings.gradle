@@ -1,3 +1,13 @@
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url "https://jitpack.io" }
+    }
+}
+
 include ':system_ui_setting'
 include ':app'
 rootProject.name = "Demo"
@@ -9,7 +19,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
+        maven { url "https://jitpack.io" }
+//        jcenter()
     }
 }
 include ':KotlinCoroutine'
+include ':wallet_connect_demo'
