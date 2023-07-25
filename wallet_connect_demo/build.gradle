@@ -3,6 +3,11 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+
+
 android {
     namespace 'io.github.tomgarden.wallet_connect_demo'
     compileSdk 33
@@ -21,6 +26,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "WALLET_CONNECT_PROJECT_ID", "\"" + localProperties['WALLET_CONNECT_PROJECT_ID'] + "\"")
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -64,4 +72,22 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    /*
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/sign/2.17.0/sign-2.17.0.pom, took 1 s 216 ms (2.32 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/sign/2.17.0/sign-2.17.0.module, took 238 ms (2.76 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/android-core/1.19.0/android-core-1.19.0.pom, took 184 ms (5.75 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/android-core/1.19.0/android-core-1.19.0.module, took 424 ms (9.33 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/sign/2.17.0/sign-2.17.0.aar, took 1 s 950 ms (826.6 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/android-core/1.19.0/android-core-1.19.0.aar, took 2 s 152 ms (1.52 MB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/sign/2.17.0/sign-2.17.0-sources.jar, took 487 ms (47 kB)
+    Download https://repo.maven.apache.org/maven2/com/walletconnect/sign/2.17.0/sign-2.17.0-javadoc.jar, took 1 s 399 ms (1.02 MB)
+    * */
+
+    implementation("com.walletconnect:android-core:1.19.0")
+    implementation("com.walletconnect:sign:2.17.0")
+
+    implementation 'com.orhanobut:logger:2.2.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
 }
