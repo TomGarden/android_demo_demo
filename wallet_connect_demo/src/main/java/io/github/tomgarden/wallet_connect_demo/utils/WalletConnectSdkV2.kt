@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -14,6 +15,17 @@ import com.walletconnect.android.relay.ConnectionType
 import com.walletconnect.sign.client.Sign
 import com.walletconnect.sign.client.SignClient
 import io.github.tomgarden.wallet_connect_demo.BuildConfig
+import io.github.tomgarden.wallet_connect_demo.utils.Chains.Companion.toMap
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.CompletableSource
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.core.ObservableOnSubscribe
+import io.reactivex.rxjava3.core.ObservableSource
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 object WalletConnectSdkV2 {
@@ -22,6 +34,9 @@ object WalletConnectSdkV2 {
         override fun onSessionApproved(approvedSession: Sign.Model.ApprovedSession) {
             // Triggered when Dapp receives the session approval from wallet
             Logger.d(gson.toJson(approvedSession))
+            SignClient.getListOfActiveSessions().also {
+                Logger.i("② SignClient.getListOfActiveSessions : ${gson.toJson(it)}")
+            }
         }
 
         override fun onSessionRejected(rejectedSession: Sign.Model.RejectedSession) {
@@ -103,17 +118,42 @@ object WalletConnectSdkV2 {
     }
 
     fun getConnectParams(): Sign.Params.Connect {
-        val pairing: Core.Model.Pairing = CoreClient.Pairing.create { error ->
-            throw IllegalStateException("Creating Pairing failed: ${error.throwable.stackTraceToString()}")
-        }!!
-
 
         val expiry =
-            (System.currentTimeMillis() / 1000) + TimeUnit.SECONDS.convert(7, TimeUnit.DAYS)
-        val properties: Map<String, String> = mapOf("sessionExpiry" to "$expiry")
+            (System.currentTimeMillis() / 1000) + TimeUnit.SECONDS.convert(3, TimeUnit.MINUTES)
+
+        val pairing = CoreClient.Pairing.create { error ->
+            Logger.e(error.throwable.stackTraceToString())
+        }?.let {
+            Core.Model.Pairing(
+                topic = it.topic,
+                expiry = expiry,
+                peerAppMetaData = it.peerAppMetaData,
+                relayProtocol = it.relayProtocol,
+                relayData = it.relayData,
+                uri = it.uri,
+                isActive = it.isActive,
+                registeredMethods = it.registeredMethods,
+            )
+        }?:let {
+            throw RuntimeException("创建 pair 失败 , 详情查看日志")
+        }
+
+
+
+
+        val properties: Map<String, String> = mapOf(
+            Pair("caip154-mandatory", "true"),
+            Pair("sessionExpiry", "$expiry"),
+            Pair("expiry", "$expiry"),
+        )
+
+
 
         return Sign.Params.Connect(
-            namespaces = Chains.getDefNamespace(),
+//            namespaces = Chains.getDefNamespace(),
+            namespaces = Chains.ETHEREUM_MAIN.toMap(),
+            optionalNamespaces = Chains.POLYGON_MUMBAI.toMap(),
             properties = properties,
             pairing = pairing,
         )
@@ -126,18 +166,79 @@ object WalletConnectSdkV2 {
 
         Logger.i("conntect : " + gson.toJson(conntect))
 
-        SignClient.connect(
-            connect = conntect,
-            onSuccess = {
-                Logger.i("SignClient.connect 成功 : " + gson.toJson(SignClient.getListOfActiveSessions()))
-                callBack.invoke(conntect, uriHandler)
-            },
-            onError = { Logger.i("SignClient.connect 失败 " + it.throwable.stackTraceToString()) }
-        )
+        fun disconnectAndReconnect() {
+            val disposable = Completable.create { emitter ->
+                try {
+                    SignClient.getListOfActiveSessions().forEach { session ->
+                        val disconnect = Sign.Params.Disconnect(session.topic)
+                        SignClient.disconnect(
+                            disconnect,
+                            onSuccess = { Logger.i("断连 : ${gson.toJson(session)}") },
+                            onError = { emitter.onError(it.throwable) })
+                    }
+                } catch (exception: Exception) {
+                    emitter.onError(exception)
+                } finally {
+                    emitter.onComplete()
+                }
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    SignClient.connect(
+                        connect = conntect,
+                        onSuccess = {
+                            Logger.i("SignClient.connect 成功 : " + gson.toJson(SignClient.getListOfActiveSessions()))
+                            callBack.invoke(conntect, uriHandler)
+                        },
+                        onError = { Logger.i("SignClient.connect 失败 " + it.throwable.stackTraceToString()) }
+                    )
+                }, {
+                    Logger.e(it.stackTraceToString())
+                })
+        }
+
+        fun getActiveSessionOrConnect(){
+            val disposable = Observable.create { emitter ->
+                try {
+                    val activeSessions = SignClient.getListOfActiveSessions()
+                    Logger.i("SignClient.getListOfActiveSessions() : ${gson.toJson(activeSessions)}")
+                    emitter.onNext(activeSessions)
+                } catch (exception: Exception) {
+                    emitter.onError(exception)
+                } finally {
+                    emitter.onComplete()
+                }
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({sessionList->
+
+                    if(!sessionList.isNullOrEmpty()) {
+                        Toast.makeText(context, "存在 活着的 session", Toast.LENGTH_SHORT).show()
+                        return@subscribe
+                    }
+
+                    SignClient.connect(
+                        connect = conntect,
+                        onSuccess = {
+                            Logger.i("SignClient.connect 成功 : " + gson.toJson(SignClient.getListOfActiveSessions()))
+                            callBack.invoke(conntect, uriHandler)
+                        },
+                        onError = { Logger.i("SignClient.connect 失败 " + it.throwable.stackTraceToString()) }
+                    )
+                }, {
+                    Logger.e(it.stackTraceToString())
+                })
+        }
+
+        disconnectAndReconnect()
+
+
     }
 
     fun gotoWallet(context: Context, uriHandler: UriHandler, connect: Sign.Params.Connect): Dialog {
-
+//        SignClient.request()
 
         return AlertDialog.Builder(context)
             .setPositiveButton(Wallet.MetaMask.walletName) { dialog: DialogInterface, which: Int ->

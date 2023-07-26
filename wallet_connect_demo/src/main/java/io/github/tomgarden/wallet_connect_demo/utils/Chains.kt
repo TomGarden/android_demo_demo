@@ -60,8 +60,12 @@ enum class Chains(
         chainNamespace = Info.Eth.chain,
         chainReference = "80001",
         color = "#8145e4",
-        methods = Info.Eth.defaultMethods,
-        events = Info.Eth.defaultEvents,
+        methods = listOf(
+            "eth_sendTransaction",
+            "eth_sign",
+            "eth_signTypedData"
+        ),
+        events = emptyList(),
         order = 5
     ),
 
@@ -130,8 +134,17 @@ enum class Chains(
     }
 
     companion object{
+        fun Chains.toMap(): Map<String, Sign.Model.Namespace.Proposal> {
+            return mapOf(
+                chainNamespace to Sign.Model.Namespace.Proposal(
+                    chains = listOf(chainId),
+                    methods = methods,
+                    events = events,
+                )
+            )
+        }
         fun getDefNamespace(): Map<String, Sign.Model.Namespace.Proposal> {
-            return listOf(Chains.ETHEREUM_MAIN,/* Chains.POLYGON_MUMBAI*/)
+            return listOf(/*ETHEREUM_MAIN,*/ POLYGON_MUMBAI)
                 .groupBy { it.chainNamespace }
                 .map { (key: String, selectedChains: List<Chains>) ->
                     key to Sign.Model.Namespace.Proposal(

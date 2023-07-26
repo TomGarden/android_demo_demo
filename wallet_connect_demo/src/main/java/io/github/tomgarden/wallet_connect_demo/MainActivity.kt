@@ -52,7 +52,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                     WalletConnectSdkV2.gotoWallet(context, uriHandler,connect).show()
                 }
             }
-
         })
     }) {
         Text(
