@@ -185,6 +185,7 @@ object WalletConnectSdkV2 {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    Logger.i("线程检查")
                     SignClient.connect(
                         connect = conntect,
                         onSuccess = {

@@ -56,3 +56,25 @@ connect param 中 methods 含义 了解 : https://docs.walletconnect.com/2.0/adv
 ```
 
 
+
+
+
+连接钱包获取 钱包 ID 后 , 如果要做 登录 , 还要单独再做通信 , request `<--->` response
+
+
+这里请求的过程中用到了 AppMetaData.redirect 这一值需要留心
+- 这个信息 , 是从 Session?.metaData?.redirect 获取的 , 这个 session 来自于 wallet 服务端 . 我们无从干涉 
+
+- 建立连接的时候使用了一个 uri 打开 Wallet : `metamask://wc?uri=xxxxxxx` . 
+- 当我们请求登录的时候也尝试使用它 , 在 Android 端看起来也是没有问题的 . 
+- 这 uri 中的参数我们还需要探究一下 , 当然了 rediect 的值我们也需要探究下 .
+  - uri 参数值 我们没有厘清  ,只是参照 demo 使用了 
+
+
+钱包连接和钱包登录流程如下
+
+1. initCore
+2. initSignClient
+3. 连接钱包 , 需要选择钱包
+4. 登录请求 , 使用上一步选定的钱包
+
