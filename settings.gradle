@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 }
 include ':KotlinCoroutine'
 include ':wallet_connect_demo'
+include ':test-by-espresso'
